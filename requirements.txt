@@ -1,2 +1,2 @@
 airflow-provider-great-expectations
-great-expectations
+great-expectations @ git+https://github.com/great-expectations/great_expectations.git@develop
