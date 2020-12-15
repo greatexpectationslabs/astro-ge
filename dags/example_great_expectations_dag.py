@@ -19,7 +19,7 @@ import airflow
 from airflow import DAG
 from great_expectations_provider.operators.great_expectations import GreatExpectationsOperator
 from great_expectations.data_context.types.base import DataContextConfig, DatasourceConfig, S3StoreBackendDefaults, \
-    FilesystemStoreBackendDefaults, LegacyDatasourceConfig
+    FilesystemStoreBackendDefaults, DatasourceConfig
 from great_expectations.data_context import BaseDataContext
 
 default_args = {
@@ -39,11 +39,11 @@ data_file = '/usr/local/airflow/include/data/yellow_tripdata_sample_2019-01.csv'
 # We could set this with environment variables
 ge_root_dir = '/usr/local/airflow/include/great_expectations'
 
-data_dir_local = '/Users/sam/code/astro-ge/include/data'
-data_file_local = '/Users/sam/code/astro-ge/include/data/yellow_tripdata_sample_2019-01.csv'
-ge_root_dir_local = '/Users/sam/code/astro-ge/include/great_expectations'
+data_dir_local = '/usr/local/airflow/include/data'
+data_file_local = '/usr/local/airflow/include/data/yellow_tripdata_sample_2019-01.csv'
+ge_root_dir_local = '/usr/local/airflow/include/great_expectations'
 
-# ge_batch_kwargs_pass = GreatExpectationsOperator(
+# ge_batch_kwargs_pass = GreatExpectationsOperator(just r
 #     task_id='ge_batch_kwargs_pass',
 #     expectation_suite_name='taxi.demo',
 #     batch_kwargs={
@@ -102,7 +102,7 @@ ge_root_dir_local = '/Users/sam/code/astro-ge/include/great_expectations'
 
 data_context_config_local = DataContextConfig(
     datasources={
-        "data__dir": LegacyDatasourceConfig(
+        "data__dir": DatasourceConfig(
             class_name="PandasDatasource",
             batch_kwargs_generators={
                 "subdir_reader": {
@@ -137,7 +137,7 @@ ge_in_code_context_local = GreatExpectationsOperator(
 
 # data_context_config_s3 = DataContextConfig(
 #     datasources={
-#         "data__dir": LegacyDatasourceConfig(
+#         "data__dir": DatasourceConfig(
 #             class_name="PandasDatasource",
 #             batch_kwargs_generators={
 #                 "subdir_reader": {
@@ -167,7 +167,7 @@ ge_in_code_context_local = GreatExpectationsOperator(
 
 # data_context_config = DataContextConfig(
 #     datasources={
-#         "data__dir": LegacyDatasourceConfig(
+#         "data__dir": DatasourceConfig(
 #             class_name="PandasDatasource",
 #             batch_kwargs_generators={
 #                 "subdir_reader": {
