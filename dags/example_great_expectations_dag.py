@@ -125,7 +125,7 @@ ge_in_code_context_local = GreatExpectationsOperator(
     task_id='ge_in_code_context_local',
     checkpoint_name="taxi.pass.chk",
     data_context=data_context_local,
-    dag=dag
+    #dag=dag
 )
 
 # This creates a data context with an S3 default backend, but a local datasource
@@ -153,7 +153,7 @@ ge_in_code_context_s3 = GreatExpectationsOperator(
         'datasource': 'my_datasource'
     },
     data_context=data_context_s3,
-    dag=dag
+    #dag=dag
 )
 
 
@@ -182,5 +182,5 @@ ge_in_code_context = GreatExpectationsOperator(
         'datasource': 'my_datasource'
     },
     data_context=data_context,
-    dag=dag
+    #dag=dag
 )
