@@ -13,6 +13,9 @@
 #
 # Note: The tasks that don't set an explicit data_context_root_dir need to be run from within
 # this examples directory, otherwise GE won't know where to find the data context.
+# 
+# Note: This DAG is ***not intended to run as a single DAG***, it's just a bunch of examples for
+# different types of invoking the Airflow operator!
 
 import os
 import airflow
@@ -32,73 +35,75 @@ dag = DAG(
     default_args=default_args
 )
 
-# This runs an expectation suite against a data asset that passes the tests
+# We could/should set these with environment variables:
 
 data_dir = '/usr/local/airflow/include/data/'
 data_file = '/usr/local/airflow/include/data/yellow_tripdata_sample_2019-01.csv'
-# We could set this with environment variables
 ge_root_dir = '/usr/local/airflow/include/great_expectations'
 
 data_dir_local = '/usr/local/airflow/include/data'
 data_file_local = '/usr/local/airflow/include/data/yellow_tripdata_sample_2019-01.csv'
 ge_root_dir_local = '/usr/local/airflow/include/great_expectations'
 
-# ge_batch_kwargs_pass = GreatExpectationsOperator(just r
-#     task_id='ge_batch_kwargs_pass',
-#     expectation_suite_name='taxi.demo',
-#     batch_kwargs={
-#         'path': data_file,
-#         'datasource': 'data__dir'
-#     },
-#     data_context_root_dir=ge_root_dir,
-#     # dag=dag
-# )
-#
-# # This runs an expectation suite against a data asset that passes the tests
-# ge_batch_kwargs_list_pass = GreatExpectationsOperator(
-#     task_id='ge_batch_kwargs_list_pass',
-#     assets_to_validate=[
-#         {
-#             'batch_kwargs': {
-#                 'path': data_file,
-#                 'datasource': 'data__dir'
-#             },
-#             'expectation_suite_name': 'taxi.demo'
-#         }
-#     ],
-#     data_context_root_dir=ge_root_dir,
-#     # dag=dag
-# )
-#
-# # This runs a checkpoint that will pass. Make sure the checkpoint yml file has the correct path to the data file.
-# ge_checkpoint_pass = GreatExpectationsOperator(
-#     task_id='ge_checkpoint_pass',
-#     run_name='ge_airflow_run',
-#     checkpoint_name='taxi.pass.chk',
-#     data_context_root_dir=ge_root_dir,
-#     # dag=dag
-# )
-#
-# # This runs a checkpoint that will fail, but we set a flag to exit the task successfully.
-# # Make sure the checkpoint yml file has the correct path to the data file.
-# ge_checkpoint_fail_but_continue = GreatExpectationsOperator(
-#     task_id='ge_checkpoint_fail_but_continue',
-#     run_name='ge_airflow_run',
-#     checkpoint_name='taxi.fail.chk',
-#     fail_task_on_validation_failure=False,
-#     data_context_root_dir=ge_root_dir,
-#     # dag=dag
-# )
-#
-# # This runs a checkpoint that will fail. Make sure the checkpoint yml file has the correct path to the data file.
-# ge_checkpoint_fail = GreatExpectationsOperator(
-#     task_id='ge_checkpoint_fail',
-#     run_name='ge_airflow_run',
-#     checkpoint_name='taxi.fail.chk',
-#     data_context_root_dir=ge_root_dir,
-#     fail_task_on_validation_failure=True,
-#     # dag=dag
-# )
+ge_batch_kwargs_pass = GreatExpectationsOperator(just r
+    task_id='ge_batch_kwargs_pass',
+    expectation_suite_name='taxi.demo',
+    batch_kwargs={
+        'path': data_file,
+        'datasource': 'data__dir'
+    },
+    data_context_root_dir=ge_root_dir,
+    # dag=dag
+)
+
+# This runs an expectation suite against a data asset that passes the tests
+ge_batch_kwargs_list_pass = GreatExpectationsOperator(
+    task_id='ge_batch_kwargs_list_pass',
+    assets_to_validate=[
+        {
+            'batch_kwargs': {
+                'path': data_file,
+                'datasource': 'data__dir'
+            },
+            'expectation_suite_name': 'taxi.demo'
+        }
+    ],
+    data_context_root_dir=ge_root_dir,
+    # dag=dag
+)
+
+# This runs a checkpoint that will pass. Make sure the checkpoint yml file has the correct path to the data file.
+ge_checkpoint_pass = GreatExpectationsOperator(
+    task_id='ge_checkpoint_pass',
+    run_name='ge_airflow_run',
+    checkpoint_name='taxi.pass.chk',
+    data_context_root_dir=ge_root_dir,
+    # dag=dag
+)
+
+# This runs a checkpoint that will fail, but we set a flag to exit the task successfully.
+# Make sure the checkpoint yml file has the correct path to the data file.
+ge_checkpoint_fail_but_continue = GreatExpectationsOperator(
+    task_id='ge_checkpoint_fail_but_continue',
+    run_name='ge_airflow_run',
+    checkpoint_name='taxi.fail.chk',
+    fail_task_on_validation_failure=False,
+    data_context_root_dir=ge_root_dir,
+    # dag=dag
+)
+
+# This runs a checkpoint that will fail. Make sure the checkpoint yml file has the correct path to the data file.
+ge_checkpoint_fail = GreatExpectationsOperator(
+    task_id='ge_checkpoint_fail',
+    run_name='ge_airflow_run',
+    checkpoint_name='taxi.fail.chk',
+    data_context_root_dir=ge_root_dir,
+    fail_task_on_validation_failure=True,
+    # dag=dag
+)
+
+# This creates a data context with a local data source and local file system defaults
+# The task then tries to run a checkpoint, which requires the context_root_dir to be set
 
 data_context_config_local = DataContextConfig(
     datasources={
@@ -112,82 +117,70 @@ data_context_config_local = DataContextConfig(
             },
         )
     },
-    # store_backend_defaults=S3StoreBackendDefaults(default_bucket_name="sam-webinar-demo")
     store_backend_defaults=FilesystemStoreBackendDefaults(root_directory=ge_root_dir_local)
 )
 data_context_local = BaseDataContext(project_config=data_context_config_local, context_root_dir=ge_root_dir_local)
 
-# This task uses the in-code data context to load data f
 ge_in_code_context_local = GreatExpectationsOperator(
     task_id='ge_in_code_context_local',
-    # expectation_suite_name='taxi.demo',
-    # batch_kwargs={
-    #     'path': data_file_local,
-    #     'datasource': 'my_datasource'
-    # },
     checkpoint_name="taxi.pass.chk",
     data_context=data_context_local,
     dag=dag
 )
 
-# ge_batch_kwargs_pass >> ge_batch_kwargs_list_pass >> ge_checkpoint_pass >> ge_checkpoint_fail_but_continue >> \
-# ge_in_code_context >> ge_checkpoint_fail
+# This creates a data context with an S3 default backend, but a local datasource
+data_context_config_s3 = DataContextConfig(
+    datasources={
+        "data__dir": DatasourceConfig(
+            class_name="PandasDatasource",
+            batch_kwargs_generators={
+                "subdir_reader": {
+                    "class_name": "SubdirReaderBatchKwargsGenerator",
+                    "base_directory": data_dir_local,
+                }
+            },
+        )
+    },
+    store_backend_defaults=S3StoreBackendDefaults(default_bucket_name="sam-webinar-demo")
+)
+data_context_s3 = BaseDataContext(project_config=data_context_config_s3)
 
-# ge_batch_kwargs_pass >> ge_in_code_context
-
-# data_context_config_s3 = DataContextConfig(
-#     datasources={
-#         "data__dir": DatasourceConfig(
-#             class_name="PandasDatasource",
-#             batch_kwargs_generators={
-#                 "subdir_reader": {
-#                     "class_name": "SubdirReaderBatchKwargsGenerator",
-#                     "base_directory": data_dir_local,
-#                 }
-#             },
-#         )
-#     },
-#     store_backend_defaults=S3StoreBackendDefaults(default_bucket_name="sam-webinar-demo")
-# )
-# data_context_s3 = BaseDataContext(project_config=data_context_config_s3)
-#
-# # This task uses the in-code data context to load data f
-# ge_in_code_context_s3 = GreatExpectationsOperator(
-#     task_id='ge_in_code_context_s3',
-#     expectation_suite_name='taxi.demo',
-#     batch_kwargs={
-#         'path': data_file_local,
-#         'datasource': 'my_datasource'
-#     },
-#     data_context=data_context_s3,
-#     dag=dag
-# )
-#
+ge_in_code_context_s3 = GreatExpectationsOperator(
+    task_id='ge_in_code_context_s3',
+    expectation_suite_name='taxi.demo',
+    batch_kwargs={
+        'path': data_file_local,
+        'datasource': 'my_datasource'
+    },
+    data_context=data_context_s3,
+    dag=dag
+)
 
 
-# data_context_config = DataContextConfig(
-#     datasources={
-#         "data__dir": DatasourceConfig(
-#             class_name="PandasDatasource",
-#             batch_kwargs_generators={
-#                 "subdir_reader": {
-#                     "class_name": "SubdirReaderBatchKwargsGenerator",
-#                     "base_directory": data_dir,
-#                 }
-#             },
-#         )
-#     },
-#     store_backend_defaults=FilesystemStoreBackendDefaults(root_directory=ge_root_dir)
-# )
-# data_context = BaseDataContext(project_config=data_context_config)
-#
-# ge_in_code_context = GreatExpectationsOperator(
-#     task_id='ge_in_code_context',
-#     expectation_suite_name='taxi.demo',
-#     batch_kwargs={
-#         'path': data_file,
-#         'datasource': 'my_datasource'
-#     },
-#     data_context=data_context,
-#     dag=dag
-# )
+# This creates a data context with a local datasource and local file system store defaults
+data_context_config = DataContextConfig(
+    datasources={
+        "data__dir": DatasourceConfig(
+            class_name="PandasDatasource",
+            batch_kwargs_generators={
+                "subdir_reader": {
+                    "class_name": "SubdirReaderBatchKwargsGenerator",
+                    "base_directory": data_dir,
+                }
+            },
+        )
+    },
+    store_backend_defaults=FilesystemStoreBackendDefaults(root_directory=ge_root_dir)
+)
+data_context = BaseDataContext(project_config=data_context_config)
+
+ge_in_code_context = GreatExpectationsOperator(
+    task_id='ge_in_code_context',
+    expectation_suite_name='taxi.demo',
+    batch_kwargs={
+        'path': data_file,
+        'datasource': 'my_datasource'
+    },
+    data_context=data_context,
+    dag=dag
+)
