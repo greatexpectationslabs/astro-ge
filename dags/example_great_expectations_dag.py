@@ -45,7 +45,7 @@ data_dir_local = '/usr/local/airflow/include/data'
 data_file_local = '/usr/local/airflow/include/data/yellow_tripdata_sample_2019-01.csv'
 ge_root_dir_local = '/usr/local/airflow/include/great_expectations'
 
-ge_batch_kwargs_pass = GreatExpectationsOperator(just r
+ge_batch_kwargs_pass = GreatExpectationsOperator(
     task_id='ge_batch_kwargs_pass',
     expectation_suite_name='taxi.demo',
     batch_kwargs={
